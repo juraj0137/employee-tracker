@@ -49,6 +49,7 @@ Employee structure
 - POST  - create new employee
 - PUT  - bulk update
 - DELETE  - delete all employees    
+
 #### `<customerID>/api/employee/<employeeId>`
 - GET  - get employee
 - PUT  - update if exist
@@ -60,7 +61,8 @@ Employee structure
 ### Salary
 
     {
-        id: number,
+        _id: number,  -- unique document id
+        _v: number,   -- version of document in Mongo
         employeeId: number,
         date: Date,
         salary: number,
@@ -70,6 +72,7 @@ Employee structure
 - GET  - get all salaries of employee
     - `dateFrom` - all salaries since date, use `Date.toISOString()`
     - `dateTo` - all salaries until date, use `Date.toISOString()`
+    
 #### `<customerID>/api/salary`
 - POST  - add new salary
 - PUT  - update if exist
