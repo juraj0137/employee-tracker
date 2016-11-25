@@ -114,7 +114,10 @@ class Dashboard extends React.Component {
      * @private
      */
     _onEmployeeSave = (employee) => {
-        console.log(employee);
+        Api.updateEmployee(employee)
+            .then((employee) => this.setState({
+                employees: {...this.state.employees, [employee.id]: employee},
+            }));
     };
 
     /**

@@ -61,7 +61,7 @@ class EditEmployeeModal extends ModalWrapper {
             const {name, phone, email, address} = this.state;
 
             //noinspection JSUnresolvedFunction
-            this.props.onSave({name, phone, email, address});
+            this.props.onSave({...this.props.employee, name, phone, email, address});
         }
 
         // hide modal
@@ -158,7 +158,7 @@ class EditEmployeeModal extends ModalWrapper {
                 {this._renderModalBody()}
             </div>
             <div className="modal-footer">
-                <Button onClick={this._onClose} type="secondary" mr="1" children="Cancel"/>
+                <Button onClick={this._onClose} type="secondary" style={{marginRight: '15px'}} children="Cancel"/>
                 <Button onClick={this._onSave} type="primary" children="Save"/>
             </div>
         </div>;
