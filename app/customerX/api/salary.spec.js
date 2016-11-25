@@ -75,7 +75,7 @@ describe('Salaries', () => {
 
 
     /*
-     * Test the /GET route
+     * Test the /GET/:employeeId route
      */
     describe('/GET/:employeeId salary', () => {
 
@@ -181,9 +181,9 @@ describe('Salaries', () => {
     });
 
     /*
-     * Test the /POST route
+     * Test the /POST/:employeeId route
      */
-    describe('/POST salary', () => {
+    describe('/POST/:employeeId salary', () => {
         it('it should not POST a salary without salary field', (done) => {
 
             const salary = {
@@ -191,7 +191,7 @@ describe('Salaries', () => {
             };
 
             chai.request(server)
-                .post(`/${config.customer.ID}/api/salary`)
+                .post(`/${config.customer.ID}/api/salary/${salary.employeeId}`)
                 .send(salary)
                 .end((err, res) => {
                     res.should.have.status(200);
@@ -209,7 +209,7 @@ describe('Salaries', () => {
             const salary = generateSalary();
 
             chai.request(server)
-                .post(`/${config.customer.ID}/api/salary`)
+                .post(`/${config.customer.ID}/api/salary/${salary.employeeId}`)
                 .send(salary)
                 .end((err, res) => {
 
@@ -253,6 +253,45 @@ describe('Salaries', () => {
                             res.body.should.have.property('message').eql('Salaries successfully deleted!');
                             res.body.should.have.property('salaries');
                             res.body.salaries.length.should.be.eql(2);
+                            done();
+                        });
+                })
+                .catch(e => console.log(e));
+
+        });
+    });
+
+    /*
+     * Test the /POST route
+     */
+    describe('/POST salary', () => {
+        it('it should return all salaries by query', (done) => {
+
+            const saveSallary = () => new Promise((resolve, reject) => {
+                const salary = new Salary(generateSalary());
+                salary.save((err) => {
+                    if (err)
+                        reject(err);
+                    else
+                        resolve(salary);
+                })
+            });
+
+            Promise
+                .all([saveSallary(), saveSallary()])
+                .then((salaries) => {
+
+                    const query = {
+                        employeeIds: salaries.map(t => t.employeeId)
+                    };
+
+                    chai.request(server)
+                        .post(`/${config.customer.ID}/api/salary`)
+                        .send(query)
+                        .end((err, res) => {
+                            res.should.have.status(200);
+                            res.body.should.be.a('array');
+                            res.body.length.should.be.eql(2);
                             done();
                         });
                 })

@@ -72,8 +72,15 @@ Employee structure
 - GET  - get all salaries of employee
     - `dateFrom` - all salaries since date, use `Date.toISOString()`
     - `dateTo` - all salaries until date, use `Date.toISOString()`
+- POST  - add new salary
     
 #### `<customerID>/api/salary`
-- POST  - add new salary
+- POST - get salaries by query 
+
+    
+    {
+        employeeIds: string[]
+    }
+    
 - PUT  - update if exist
 - DELETE  - delete salary

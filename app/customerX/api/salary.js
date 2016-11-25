@@ -63,6 +63,7 @@ const deleteSalaries = (req, res) => {
         });
     }
 }
+
 const updateSalaries = (req, res) => {
     if (!(req.body instanceof Array)) {
         res.json({message: "You must send array of salaries!"});
@@ -86,12 +87,42 @@ const updateSalaries = (req, res) => {
     }
 }
 
+const getSalariesByQuery = (req, res) => {
+
+    const queryParams = {};
+
+    if (typeof req.body.dateFrom == "string") {
+        queryParams.date = queryParams.date || {};
+        queryParams.date['$gte'] = new Date(req.query.dateFrom).toISOString();
+    }
+
+    if (typeof req.body.dateTo == "string") {
+        queryParams.date = queryParams.date || {};
+        queryParams.date['$lt'] = new Date(req.query.dateTo).toISOString();
+    }
+
+    if (typeof req.body.employeeIds == "object") {
+        queryParams.employeeId = {$in: req.body.employeeIds};
+    }
+    
+    const query = Salary.find(queryParams);
+    query.exec((err, salaries) => {
+
+        if (err)
+            res.send(err);
+
+        res.json(salaries);
+    });
+
+}
+
 router.route('/:employeeId')
+    .post(createSalary)
     .get(getAllSalaries);
 
 router.route('/')
+    .post(getSalariesByQuery)
     .delete(deleteSalaries)
-    .put(updateSalaries)
-    .post(createSalary);
+    .put(updateSalaries);
 
 export default router;
