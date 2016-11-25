@@ -7,7 +7,7 @@ import Employee from '../../base/model/employee';
 const router = express.Router();
 
 /**
- * /api/employee`
+ * /api/employee
  */
 
 const getEmployees = (req, res) => {

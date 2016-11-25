@@ -7,13 +7,20 @@ let customerXPath = path.resolve(appPath, "customerX", "react", "index.js");
 
 const plugins = [
     new ExtractTextPlugin("[name]/build/bundle.css", {allChunks: false}),
+    new webpack.ProvidePlugin({
+        $: "jquery",
+        jQuery: "jquery",
+        "window.jQuery": "jquery",
+        "window.Tether": 'tether'
+    })
 ];
 
 const stylesLoaders = (isProd) => {
 
     let loaders = {
         'css': '',
-        'less': '!less-loader'
+        'less': '!less-loader',
+        'sass': '!sass-loader',
     };
 
     return Object.keys(loaders).map(ext => {
@@ -36,7 +43,7 @@ const webpackConfig = {
     },
     module: {
         loaders: [
-            {test: /\.jsx?$/, loader: 'babel?presets[]=es2015', exclude: /node_modules/},
+            {test: /\.jsx?$/, loader: 'babel', exclude: /node_modules/},
             {test: /\.svg/, loader: 'url-loader?limit=10000'},
             {test: /\.eot/, loader: 'url-loader?limit=100000&mimetype=application/vnd.ms-fontobject'},
             {test: /\.woff2/, loader: 'url-loader?limit=100000&mimetype=application/font-woff2'},
