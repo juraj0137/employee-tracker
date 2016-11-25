@@ -4,11 +4,12 @@ import {Api} from '../../utils'
 
 import {Navbar} from "../../components/navbar"
 import {EmployeeList} from "../../components/employee-list"
-import {EditEmployeeModal, DetailEmployeeModal} from "../../components/employee-modal"
+import {EditEmployeeModal, DetailEmployeeModal, RemoveEmployeeModal} from "../../components/employee-modal"
 
 const REF_MODAL_NEW = 'employee-modal-new';
 const REF_MODAL_EDIT = 'employee-modal-edit';
 const REF_MODAL_DETAIL = 'employee-modal-detail';
+const REF_MODAL_REMOVE = 'employee-modal-remove';
 
 /**
  *
@@ -113,11 +114,39 @@ class Dashboard extends React.Component {
      * @param employee
      * @private
      */
+    _onDeleteEmployeeClick = (employee) => {
+        this.setState({employee}, () => {
+            this.refs[REF_MODAL_REMOVE].showModal();
+        });
+    };
+
+    /**
+     *
+     * @param employee
+     * @private
+     */
     _onEmployeeSave = (employee) => {
         Api.updateEmployee(employee)
             .then((employee) => this.setState({
                 employees: {...this.state.employees, [employee.id]: employee},
             }));
+    };
+
+    /**
+     *
+     * @param employee
+     * @private
+     */
+    _onEmployeeDelete = (employee) => {
+        Api.updateEmployee(employee)
+            .then((employee) => {
+                const newEmployees = {...this.state.employees};
+                delete newEmployees[employee.id];
+                this.setState({
+                    employees: newEmployees,
+                    employeeIds: this.state.employeeIds.filter(id => id != employee.id)
+                })
+            });
     };
 
     /**
@@ -150,7 +179,7 @@ class Dashboard extends React.Component {
             <div className="container" style={{marginTop: '100px'}}>
                 <EmployeeList
                     data={this._getFilteredEmployees()}
-                    onDeleteClick={() => alert('delete')}
+                    onDeleteClick={this._onDeleteEmployeeClick}
                     onEditClick={this._onEditEmployeeClick}
                     onRowClick={this._onDetailEmployeeClick}
                 />
@@ -172,6 +201,12 @@ class Dashboard extends React.Component {
             <DetailEmployeeModal
                 title="Detail"
                 ref={REF_MODAL_DETAIL}
+                employee={this.state.employee}
+            />
+
+            <RemoveEmployeeModal
+                ref={REF_MODAL_REMOVE}
+                onAccept={this._onEmployeeDelete}
                 employee={this.state.employee}
             />
 

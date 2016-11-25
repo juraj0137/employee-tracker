@@ -29,7 +29,7 @@ export class Api {
         return delay(500).then(() => {
 
             let employees = [];
-            for (let i = 0; i < 20; i++) {
+            for (let i = 0; i < 5; i++) {
                 employees.push({
                     id: v4(),
                     name: 'Uzasne meno',
