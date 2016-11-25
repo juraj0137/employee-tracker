@@ -1,13 +1,14 @@
 import React from "react";
 import IsEmail from "regex-email";
-import {Button} from "../button";
+import {Button} from '../button';
+import {ModalWrapper} from './wrapper';
 
 /**
  * Modal for editing information about employee
  *
  * @component
  */
-class EditEmployeeModal extends React.Component {
+class EditEmployeeModal extends ModalWrapper {
 
     /**
      *
@@ -18,18 +19,22 @@ class EditEmployeeModal extends React.Component {
         super(props);
 
         this.state = this._getInitialState();
-
-        this._onSave = this._onSave.bind(this);
-        this._onClose = this._onClose.bind(this);
     }
 
 
+    componentWillReceiveProps(nextProps) {
+        if (nextProps.employee != null) {
+            const {name, email, phone, address} = nextProps.employee;
+            this.setState({name, email, phone, address});
+        }
+    }
+
     /**
      *
-     * @returns {{active: boolean, name: string, email: string, phone: string, address: string, errors: Array}}
+     * @returns {{name: string, email: string, phone: string, address: string, errors: Array}}
      * @private
      */
-    _getInitialState() {
+    _getInitialState = () => {
         return {
             name: '',
             email: '',
@@ -37,36 +42,49 @@ class EditEmployeeModal extends React.Component {
             address: '',
             errors: []
         };
-    }
+    };
 
     /**
      *
      * @private
      */
-    _onSave() {
+    _onSave = () => {
         // verification
         if (this._isValidForm() == false) return;
 
         // call callback
-        const {name, phone, email, address} = this.state;
-        this.props.onSave({name, phone, email, address});
+        //noinspection JSUnresolvedVariable
+        if (typeof this.props.onSave == "function") {
+            const {name, phone, email, address} = this.state;
+
+            //noinspection JSUnresolvedFunction
+            this.props.onSave({name, phone, email, address});
+        }
 
         // hide modal
-        this.props.onHideModal();
-    }
+        this._onClose();
+    };
 
 
     /**
      *
      * @private
      */
-    _onClose() {
+    _onClose = () => {
+        // reset state
         this.setState(this._getInitialState());
-        this.props.onHideModal();
-    }
+
+        // hide modal
+        super.hideModal();
+    };
 
 
-    _isValidForm() {
+    /**
+     *
+     * @returns {boolean}
+     * @private
+     */
+    _isValidForm = () => {
         const {name, phone, email, address} = this.state;
         const errors = [];
 
@@ -83,47 +101,45 @@ class EditEmployeeModal extends React.Component {
             this.setState({errors});
 
         return errors.length === 0;
-    }
-
+    };
 
     /**
      *
      * @returns {XML}
      * @private
      */
-    _renderModalBody() {
+    _renderModalBody = () => {
 
-        const errors = this.state.errors.map((error, i) => <tr key={i}>
-            <td></td>
-            <td style={{textAlign: 'left', color: 'red'}}>{error}</td>
-        </tr>);
+        const errorsList = this.state.errors.length == 0 ? null : <div className="row alert alert-danger">
+            {this.state.errors.map(error => <div>{error}</div>)}
+        </div>;
 
-        return <table>
-            <tbody>
-            {errors}
-            <tr>
-                <td>* Full name:</td>
-                <td><Input value={this.state.name} onChange={(name) => this.setState({name})}/></td>
-            </tr>
-            <tr>
-                <td>Email:</td>
-                <td><Input value={this.state.email} onChange={(email) => this.setState({email})}/></td>
-            </tr>
-            <tr>
-                <td>Address:</td>
-                <td><Input value={this.state.address} onChange={(address) => this.setState({address})}/></td>
-            </tr>
-            <tr>
-                <td>Phone number:</td>
-                <td><Input value={this.state.phone} onChange={(phone) => this.setState({phone})}/></td>
-            </tr>
-            <tr>
-                <td colSpan="2">* required fields</td>
-            </tr>
-            </tbody>
-        </table>;
-    }
+        return <div className="container-fluid">
+            {errorsList}
 
+            <InputGroup label="* Full name:"
+                        value={this.state.name}
+                        onChange={(name) => this.setState({name})}/>
+
+            <InputGroup label="Email:"
+                        type="email"
+                        value={this.state.email}
+                        onChange={(email) => this.setState({email})}/>
+
+            <InputGroup label="Address:"
+                        value={this.state.address}
+                        onChange={(address) => this.setState({address})}/>
+
+            <InputGroup label="Phone number:"
+                        type="telephone"
+                        value={this.state.phone}
+                        onChange={(phone) => this.setState({phone})}/>
+
+            <div className="row">
+                <div className="col-sm-8 push-sm-4">* required fields</div>
+            </div>
+        </div>;
+    };
 
     /**
      *
@@ -131,37 +147,45 @@ class EditEmployeeModal extends React.Component {
      * @returns {XML}
      */
     render() {
-
-        return <div className="modal-inner">
-            <div className="modal-title">{this.props.title}</div>
+        const modal = <div className="modal-content">
+            <div className="modal-header">
+                <h4 className="modal-title">{this.props.title}</h4>
+            </div>
             <div className="modal-body">
                 {this._renderModalBody()}
             </div>
             <div className="modal-footer">
-                <Button onClick={this._onClose} style={{marginRight: '15px'}}>Cancel</Button>
-                <Button onClick={this._onSave}>Save</Button>
+                <Button onClick={this._onClose} type="secondary" mr="1" children="Cancel"/>
+                <Button onClick={this._onSave} type="primary" children="Save"/>
             </div>
-        </div>
+        </div>;
+
+        return super.renderWrapper(modal);
     }
 }
 
 
 /**
- * Input wrapper for easier manipulation with onChange handler
+ * Input group wrapper for easier manipulation with onChange handler
  *
  * @param props
  * @returns {XML}
  * @constructor
  */
-const Input = (props) => {
+const InputGroup = (props) => {
 
-    const {onChange, ...rest} = props;
-
+    const {onChange, label, value, type = 'text'} = props;
+    const id = Math.round(Math.random() * 10000);
     const _onChange = (event) => {
         onChange(event.target.value);
     };
 
-    return <input type="text" onChange={_onChange} {...rest}/>
+    return <div className="row form-group">
+        <label className="col-md-4 col-form-label text-xs-right" htmlFor={id}>{label}</label>
+        <div className="col-md-8">
+            <input className="form-control" type={type} onChange={_onChange} value={value} id={id}/>
+        </div>
+    </div>
 };
 
 export {EditEmployeeModal};
