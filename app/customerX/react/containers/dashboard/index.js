@@ -1,14 +1,14 @@
-import "./style.less";
 import React from "react";
 
 import {Api} from '../../utils'
 
 import {Navbar} from "../../components/navbar"
-import {BottomBar} from "../../components/bottombar"
 import {EmployeeList} from "../../components/employee-list"
-import {EmployeeModal} from "../../components/employee-modal"
+import {EditEmployeeModal, DetailEmployeeModal} from "../../components/employee-modal"
 
-const REF_EMPLOYEE_MODAL = 'employee_modal';
+const REF_MODAL_NEW = 'employee-modal-new';
+const REF_MODAL_EDIT = 'employee-modal-edit';
+const REF_MODAL_DETAIL = 'employee-modal-detail';
 
 /**
  *
@@ -25,36 +25,49 @@ class Dashboard extends React.Component {
         this.state = {
             filterText: '',
             processing: false,
-            employees: [
-                {name: "ahoj", address: "Brmbolkovo", phone: "12345798", email: "ahoj@ahoj.sk"}
-            ],
+            employee: null,
+            employees: {},
+            employeeIds: [],
         };
-
-        this._onFilterChange = this._onFilterChange.bind(this);
-        this._onNewEmployeeSave = this._onNewEmployeeSave.bind(this);
-        this._onAddEmployeeClick = this._onAddEmployeeClick.bind(this);
-        this._getFilteredEmployees = this._getFilteredEmployees.bind(this);
     }
 
+    /**
+     *
+     */
+    componentDidMount() {
+        Api.loadEmployees().then(employees => {
+
+            const employeesById = employees.reduce((prev, next) => {
+                prev[next.id] = next;
+                return prev;
+            }, {});
+
+            this.setState({
+                employees: employeesById,
+                employeeIds: Object.keys(employeesById)
+            });
+        });
+
+    }
 
     /**
      *
      * @param filter
      * @private
      */
-    _onFilterChange(filter) {
+    _onFilterChange = (filter) => {
         const {filterText} = filter;
         this.setState({filterText: filterText.toLowerCase()});
-    }
+    };
 
 
     /**
      *
      * @private
      */
-    _onAddEmployeeClick() {
-        this.refs[REF_EMPLOYEE_MODAL].showModal()
-    }
+    _onAddEmployeeClick = ()=> {
+        this.refs[REF_MODAL_NEW].showModal()
+    };
 
 
     /**
@@ -62,7 +75,7 @@ class Dashboard extends React.Component {
      * @param values
      * @private
      */
-    _onNewEmployeeSave(values) {
+    _onNewEmployeeSave = (values)=> {
 
         this.setState({processing: true});
 
@@ -70,20 +83,52 @@ class Dashboard extends React.Component {
             .then((employee) => this.setState({employees: this.state.employees.concat([employee])}))
             .then(() => this.setState({processing: false}))
             .catch(e => console.log(e));
-    }
+    };
 
+    /**
+     *
+     * @param employee
+     * @private
+     */
+    _onDetailEmployeeClick = (employee) => {
+        this.setState({employee}, () => {
+            this.refs[REF_MODAL_DETAIL].showModal();
+        });
+    };
+
+    /**
+     *
+     * @param employee
+     * @private
+     */
+    _onEditEmployeeClick = (employee) => {
+        this.setState({employee}, () => {
+            this.refs[REF_MODAL_EDIT].showModal();
+        });
+    };
+
+    /**
+     *
+     * @param employee
+     * @private
+     */
+    _onEmployeeSave = (employee) => {
+        console.log(employee);
+    };
 
     /**
      *
      * @returns {Array.<*>}
      * @private
      */
-    _getFilteredEmployees() {
-        return this.state.employees.filter(employee => {
-            const {filterText} = this.state;
-            return !(filterText.length > 0 && employee.name.toLowerCase().search(filterText) == -1);
-        });
-    }
+    _getFilteredEmployees = () => {
+        return this.state.employeeIds
+            .map(id => this.state.employees[id])
+            .filter(employee => {
+                const {filterText} = this.state;
+                return !(filterText.length > 0 && employee.name.toLowerCase().search(filterText) == -1);
+            });
+    };
 
 
     /**
@@ -91,14 +136,41 @@ class Dashboard extends React.Component {
      * @returns {XML}
      */
     render() {
-        return <div className="container">
-            <Navbar onFilterChange={this._onFilterChange} onAddEmployeeClick={this._onAddEmployeeClick}/>
-            <EmployeeList data={this._getFilteredEmployees()}/>
-            <BottomBar text={`Total / Average sallary: `}/>
-            <EmployeeModal ref={REF_EMPLOYEE_MODAL}
-                           type="new"
-                           onSave={this._onNewEmployeeSave}
-                           title="Add new employee"/>
+
+        return <div>
+            <Navbar
+                onFilterChange={this._onFilterChange}
+                onAddEmployeeClick={this._onAddEmployeeClick}
+            />
+
+            <div className="container" style={{marginTop: '100px'}}>
+                <EmployeeList
+                    data={this._getFilteredEmployees()}
+                    onDeleteClick={() => alert('delete')}
+                    onEditClick={this._onEditEmployeeClick}
+                    onRowClick={this._onDetailEmployeeClick}
+                />
+            </div>
+
+            <EditEmployeeModal
+                ref={REF_MODAL_NEW}
+                title="Add new employee"
+                onSave={this._onNewEmployeeSave}
+            />
+
+            <EditEmployeeModal
+                ref={REF_MODAL_EDIT}
+                title="Edit employee"
+                onSave={this._onEmployeeSave}
+                employee={this.state.employee}
+            />
+
+            <DetailEmployeeModal
+                title="Detail"
+                ref={REF_MODAL_DETAIL}
+                employee={this.state.employee}
+            />
+
         </div>
     }
 }
