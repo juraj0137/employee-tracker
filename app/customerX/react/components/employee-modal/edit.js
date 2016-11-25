@@ -19,6 +19,9 @@ class EditEmployeeModal extends ModalWrapper {
         super(props);
 
         this.state = this._getInitialState();
+
+        // onClose function can't be arrow function assigned to class property because there is called 'super'
+        this._onClose = this._onClose.bind(this);
     }
 
 
@@ -70,7 +73,7 @@ class EditEmployeeModal extends ModalWrapper {
      *
      * @private
      */
-    _onClose = () => {
+    _onClose() {
         // reset state
         this.setState(this._getInitialState());
 

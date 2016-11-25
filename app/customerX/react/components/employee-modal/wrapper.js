@@ -8,6 +8,14 @@ import React from "react";
  */
 class ModalWrapper extends React.Component {
 
+    constructor(props) {
+        super(props);
+
+        // renderWrapper can't be arrow function assigned to class property
+        // because of calling 'super.renderWrapper' in child class
+        this.renderWrapper = this.renderWrapper.bind(this);
+    }
+
     /**
      * Modal id
      *
@@ -36,7 +44,7 @@ class ModalWrapper extends React.Component {
      * @param children
      * @returns {XML}
      */
-    renderWrapper = (children) => {
+    renderWrapper(children) {
         return <div className="modal fade" role="dialog" id={this.id} data-backdrop="static">
             <div className="modal-dialog" role="document">
                 <div className="modal-content">
