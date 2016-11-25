@@ -1,109 +1,117 @@
+import './detail.less';
 import React from "react";
-import {Button} from "../button";
+import {Button} from '../button';
+import {ModalWrapper} from './wrapper';
 
 /**
- * Modal for editing information about employee
+ * Modal for viewing information about employee
  *
  * @component
  */
-class DetailEmployeeModal extends React.Component {
+class DetailEmployeeModal extends ModalWrapper {
 
     /**
      *
      * @returns {XML}
      * @private
      */
-    _renderEmployeeInfo() {
+    _renderEmployeeInfo = () => {
 
-        return <table className="employee-info">
+        const infoConfig = {
+            name: 'Full name:',
+            email: 'Email:',
+            address: 'Address:',
+            phone: 'Phone number:',
+        };
+
+        const rows = Object.keys(infoConfig).map(key => <tr key={key}>
+            <td className="font-weight-bold">{infoConfig[key]}</td>
+            <td>{this.props.employee[key]}</td>
+        </tr>);
+
+        return <table className="table">
             <tbody>
-            <tr>
-                <td>Full name:</td>
-                <td>{this.props.employee.name}</td>
-            </tr>
-            <tr>
-                <td>Email:</td>
-                <td>{this.props.employee.email}</td>
-            </tr>
-            <tr>
-                <td>Address:</td>
-                <td>{this.props.employee.address}</td>
-            </tr>
-            <tr>
-                <td>Phone number:</td>
-                <td>{this.props.employee.phone}</td>
-            </tr>
+            {rows}
             </tbody>
         </table>;
-    }
+    };
 
-    _renderSalaries() {
+    /**
+     *
+     * @returns {XML}
+     * @private
+     */
+    _renderSalaries = () => {
         return <div className="salary-wrapper">
-            <h2>Salaries:</h2>
-            <div className="table-scroll-wrapper">
+            <table className="table">
+                <thead>
+                <tr>
+                    <th>Month</th>
+                    <th>Salary</th>
+                </tr>
+                </thead>
+                <tbody>
 
-                <table>
-                    <tr>
-                        <td>January 2016</td>
-                        <td>2450E</td>
-                    </tr>
-                    <tr>
-                        <td>January 2016</td>
-                        <td>2450E</td>
-                    </tr>
-                    <tr>
-                        <td>January 2016</td>
-                        <td>2450E</td>
-                    </tr>
-                    <tr>
-                        <td>January 2016</td>
-                        <td>2450E</td>
-                    </tr>
-                    <tr>
-                        <td>January 2016</td>
-                        <td>2450E</td>
-                    </tr>
-                    <tr>
-                        <td>January 2016</td>
-                        <td>2450E</td>
-                    </tr>
-                    <tr>
-                        <td>January 2016</td>
-                        <td>2450E</td>
-                    </tr>
-                    <tr>
-                        <td>January 2016</td>
-                        <td>2450E</td>
-                    </tr>
-                    <tr>
-                        <td>January 2016</td>
-                        <td>2450E</td>
-                    </tr>
-                    <tr>
-                        <td>January 2016</td>
-                        <td>2450E</td>
-                    </tr>
-                    <tr>
-                        <td>January 2016</td>
-                        <td>2450E</td>
-                    </tr>
-                    <tr>
-                        <td>January 2016</td>
-                        <td>2450E</td>
-                    </tr>
-                    <tr>
-                        <td>January 2016</td>
-                        <td>2450E</td>
-                    </tr>
-                    <tr>
-                        <td>January 2016</td>
-                        <td>2450E</td>
-                    </tr>
-                </table>
-            </div>
+                <tr>
+                    <td>January 2016</td>
+                    <td>2450E</td>
+                </tr>
+                <tr>
+                    <td>January 2016</td>
+                    <td>2450E</td>
+                </tr>
+                <tr>
+                    <td>January 2016</td>
+                    <td>2450E</td>
+                </tr>
+                <tr>
+                    <td>January 2016</td>
+                    <td>2450E</td>
+                </tr>
+                <tr>
+                    <td>January 2016</td>
+                    <td>2450E</td>
+                </tr>
+                <tr>
+                    <td>January 2016</td>
+                    <td>2450E</td>
+                </tr>
+                <tr>
+                    <td>January 2016</td>
+                    <td>2450E</td>
+                </tr>
+                <tr>
+                    <td>January 2016</td>
+                    <td>2450E</td>
+                </tr>
+                </tbody>
+            </table>
         </div>
-    }
+    };
 
+    /**
+     *
+     * @private
+     */
+    _onSalaryAddClick = () => {
+        //noinspection JSUnresolvedVariable
+        if (typeof this.props.onSalaryAdd == "function") {
+            //noinspection JSUnresolvedFunction
+            this.props.onSalaryAdd();
+        }
+    };
+
+    /**
+     *
+     * @private
+     */
+    _onCancelClick = () => {
+        //noinspection JSUnresolvedVariable
+        if (typeof this.props.onHideModal == "function") {
+            //noinspection JSUnresolvedFunction
+            this.props.onHideModal()
+        }
+    };
 
     /**
      *
@@ -115,18 +123,30 @@ class DetailEmployeeModal extends React.Component {
         if (this.props.employee == null)
             return null;
 
-        return <div className="modal-inner">
-            <div className="modal-title">{this.props.title}</div>
-            <div className="modal-body">
-                {this._renderEmployeeInfo()}
-                {this._renderSalaries()}
+        const modal = <div className="modal-content">
+            <div className="modal-header">
+                <h4 className="modal-title">{this.props.title}</h4>
             </div>
+
+            <div className="modal-body row">
+                <div className="col-sm-6">
+                    <h4>Personal info</h4>
+                    {this._renderEmployeeInfo()}
+                    <Button className="text-xs-left" onClick={this._onSalaryAddClick} children="Add salary"/>
+                </div>
+                <div className="col-sm-6">
+                    <h4>Salaries</h4>
+                    {this._renderSalaries()}
+                </div>
+            </div>
+
             <div className="modal-footer">
-                <Button onClick={() => this.props.onHideModal()} style={{marginRight: '15px'}}>Cancel</Button>
+                <Button type="secondary" onClick={this._onCancelClick} children="Cancel"/>
             </div>
-        </div>
+        </div>;
+
+        return super.renderWrapper(modal);
     }
 }
-
 
 export {DetailEmployeeModal};
