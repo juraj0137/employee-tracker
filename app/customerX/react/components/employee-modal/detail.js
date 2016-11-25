@@ -101,16 +101,16 @@ class DetailEmployeeModal extends ModalWrapper {
         }
     };
 
+    _hideModal() {
+        super.hideModal();
+    }
+
     /**
      *
      * @private
      */
     _onCancelClick = () => {
-        //noinspection JSUnresolvedVariable
-        if (typeof this.props.onHideModal == "function") {
-            //noinspection JSUnresolvedFunction
-            this.props.onHideModal()
-        }
+        this._hideModal();
     };
 
     /**

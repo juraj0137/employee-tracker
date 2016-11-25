@@ -47,7 +47,7 @@ class ModalWrapper extends React.Component {
      */
     renderWrapper(children) {
         return <div className="modal fade" role="dialog" id={this.id} data-backdrop="static">
-            <div className="modal-dialog" role="document">
+            <div className="modal-dialog modal-lg" role="document">
                 <div className="modal-content">
                     {children}
                 </div>
