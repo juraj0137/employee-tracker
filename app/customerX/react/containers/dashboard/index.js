@@ -24,7 +24,6 @@ class Dashboard extends React.Component {
 
         this.state = {
             filterText: '',
-            processing: false,
             employee: null,
             employees: {},
             employeeIds: [],
@@ -65,7 +64,7 @@ class Dashboard extends React.Component {
      *
      * @private
      */
-    _onAddEmployeeClick = ()=> {
+    _onAddEmployeeClick = () => {
         this.refs[REF_MODAL_NEW].showModal()
     };
 
@@ -77,11 +76,13 @@ class Dashboard extends React.Component {
      */
     _onNewEmployeeSave = (values)=> {
 
-        this.setState({processing: true});
-
         Api.saveEmployee(values)
-            .then((employee) => this.setState({employees: this.state.employees.concat([employee])}))
-            .then(() => this.setState({processing: false}))
+            .then(employee =>
+                this.setState({
+                    employees: {...this.state.employees, [employee.id]: employee},
+                    employeeIds: [employee.id, ...this.state.employeeIds]
+                })
+            )
             .catch(e => console.log(e));
     };
 

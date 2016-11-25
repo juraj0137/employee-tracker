@@ -11,8 +11,9 @@ class ModalWrapper extends React.Component {
     constructor(props) {
         super(props);
 
-        // renderWrapper can't be arrow function assigned to class property
+        // hideModal & renderWrapper can't be arrow function assigned to class property
         // because of calling 'super.renderWrapper' in child class
+        this.hideModal = this.hideModal.bind(this);
         this.renderWrapper = this.renderWrapper.bind(this);
     }
 
@@ -35,7 +36,7 @@ class ModalWrapper extends React.Component {
      *
      *
      */
-    hideModal = () => {
+    hideModal() {
         $(`#${this.id}`).modal('hide');
     };
 
