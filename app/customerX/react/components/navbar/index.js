@@ -1,6 +1,4 @@
-import "./style.less";
 import React from "react";
-import {Button} from '../button';
 
 class Navbar extends React.Component {
 
@@ -12,9 +10,7 @@ class Navbar extends React.Component {
 
     onQuickFilterChange(event) {
         const value = event.target.value.trim();
-        if (value.length > 0) {
-            this.props._onFilterChange({filterText: value});
-        }
+        this.props.onFilterChange({filterText: value});
     }
 
     last24Months() {
@@ -25,23 +21,45 @@ class Navbar extends React.Component {
             months.push(date);
         }
         return months.map((month, key) => {
-            return <option key={key} value={month}>{`${month.getMonth() + 1}.${month.getFullYear()}`}</option>
+            return <a key={key} className="dropdown-item">
+                {`${month.getMonth() + 1}.${month.getFullYear()}`}
+            </a>;
         })
     }
 
     render() {
-        return <div className="navbar">
-            <select name="" id="" className="button month-filter">
-                {this.last24Months()}
-            </select>
-            <input type="text"
-                   className="navbar-input-filter"
-                   placeholder="Quick filter..."
-                   onChange={this.onQuickFilterChange}/>
-            <Button className="filter-seach">Q</Button>
-            <Button className="button add-employee" onClick={this.props.onAddEmployeeClick}>+ Add employee</Button>
-        </div>
+        return <nav className="navbar navbar-light bg-faded navbar-fixed-top">
+
+            <span className="navbar-brand">Salary tracker</span>
+
+            <ul className="nav navbar-nav">
+                <li className="nav-item dropdown">
+                    <a className="nav-link dropdown-toggle"
+                       id="monthFilter"
+                       data-toggle="dropdown">Month filter</a>
+
+                    <div className="dropdown-menu" aria-labelledby="monthFilter">
+                        {this.last24Months()}
+                    </div>
+
+                </li>
+            </ul>
+
+            <div className="form-inline">
+
+                <input className="form-control"
+                       placeholder="Filter..."
+                       style={{marginRight: '20px', marginLeft: '50px'}}
+                       onChange={this.onQuickFilterChange}/>
+
+                <button className="btn btn-outline-success"
+                        onClick={this.props.onAddEmployeeClick}>Add employee
+                </button>
+
+            </div>
+        </nav>;
     }
+
 }
 
 export {Navbar};
