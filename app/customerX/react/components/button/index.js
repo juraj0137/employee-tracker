@@ -1,20 +1,15 @@
 import "./style.less";
 import React from "react";
 
-class Button extends React.Component {
+const Button = (props) => {
 
-    constructor(props) {
-        super(props);
-    }
+    const {className, type = 'info', icon = '', mr = 0, ...rest} = props;
+    const Icon = icon.length > 0 ? <i className={`fa fa-fw fa-${plus} mr-${mr}`}/> : null;
 
-    render() {
-
-        const {className, ...rest} = this.props;
-
-        return <button className={`button ${className}`} {...rest}>
-            {this.props.children}
-        </button>
-    }
-}
+    return <button className={`btn btn-${type} ${className}`} {...rest}>
+        {Icon}
+        {props.children}
+    </button>
+};
 
 export {Button};
