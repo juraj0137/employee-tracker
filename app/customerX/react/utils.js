@@ -6,20 +6,19 @@ import {v4} from 'node-uuid';
 const delay = (ms) =>
     new Promise(resolve => setTimeout(resolve, ms));
 
-export class Api {
+class EmployeeApi {
 
-    static saveEmployee(values) {
+    static saveEmployee(employee) {
         return delay(500).then(() => {
 
             // api call
-            values.id = v4();
-            return values;
+            employee.id = v4();
+            return employee;
         });
     }
 
     static updateEmployee(employee) {
         return delay(500).then(() => {
-
             return employee;
         });
     }
@@ -36,7 +35,69 @@ export class Api {
             return employees;
         });
     }
+
+    static deleteEmployee(employee) {
+        return delay(500).then(() => {
+            return employee;
+        });
+    }
 }
+
+class SalaryApi {
+
+    static salaries = []
+
+    static loadSalariesByEmployeeIds(ids, options = {}) {
+
+        return delay(500).then(() => {
+
+            if (this.salaries.length == 0)
+                ids.forEach(id => {
+                    for (let i = 0; i < 11; i++) {
+                        this.salaries.push(generateSalary(id, i));
+                    }
+                });
+
+            return this.salaries.filter(salary => {
+
+                if (options.dateFrom instanceof Date && salary.date < options.dateFrom)
+                    return false;
+
+                if (options.dateTo instanceof Date && salary.date >= options.dateTo)
+                    return false;
+
+                return true;
+            });
+        });
+    }
+
+
+    static saveSalary(salary) {
+        return delay(500).then(() => {
+
+            // api call
+            salary.id = v4();
+            return salary;
+        });
+    }
+}
+
+export {
+    EmployeeApi,
+    SalaryApi,
+}
+
+const generateSalary = (employeeId, month = 0) => {
+    const rand = (arr) => arr[Math.floor(Math.random() * arr.length)];
+    const date = new Date();
+    date.setMonth(date.getMonth() - month);
+    return {
+        id: v4(),
+        employeeId: employeeId,
+        salary: Math.floor(Math.random() * 1000) + 1500,
+        date: date
+    }
+};
 
 const generateEmployee = () => {
     const rand = (arr) => arr[Math.floor(Math.random() * arr.length)];

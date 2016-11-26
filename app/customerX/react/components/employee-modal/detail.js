@@ -1,6 +1,7 @@
 import './detail.less';
 import React from "react";
 import {Button} from '../button';
+import {InputGroup} from '../input-group';
 import {ModalWrapper} from './wrapper';
 
 /**
@@ -42,6 +43,22 @@ class DetailEmployeeModal extends ModalWrapper {
      * @private
      */
     _renderSalaries = () => {
+
+        const {salaries, salariesByEmployeeId, employee} = this.props;
+
+        if (!(salariesByEmployeeId[employee.id] instanceof Array))
+            return;
+
+        const rows = salariesByEmployeeId[employee.id]
+            .map((salaryId, i) => {
+                const salary = salaries[salaryId];
+                const date = `${salary.date.getDate()}.${salary.date.getMonth() + 1}.${salary.date.getFullYear()}`;
+                return <tr key={i}>
+                    <td>{date}</td>
+                    <td>{salary.salary}E</td>
+                </tr>;
+            });
+
         return <div className="salary-wrapper">
             <table className="table">
                 <thead>
@@ -51,54 +68,10 @@ class DetailEmployeeModal extends ModalWrapper {
                 </tr>
                 </thead>
                 <tbody>
-
-                <tr>
-                    <td>January 2016</td>
-                    <td>2450E</td>
-                </tr>
-                <tr>
-                    <td>January 2016</td>
-                    <td>2450E</td>
-                </tr>
-                <tr>
-                    <td>January 2016</td>
-                    <td>2450E</td>
-                </tr>
-                <tr>
-                    <td>January 2016</td>
-                    <td>2450E</td>
-                </tr>
-                <tr>
-                    <td>January 2016</td>
-                    <td>2450E</td>
-                </tr>
-                <tr>
-                    <td>January 2016</td>
-                    <td>2450E</td>
-                </tr>
-                <tr>
-                    <td>January 2016</td>
-                    <td>2450E</td>
-                </tr>
-                <tr>
-                    <td>January 2016</td>
-                    <td>2450E</td>
-                </tr>
+                {rows}
                 </tbody>
             </table>
         </div>
-    };
-
-    /**
-     *
-     * @private
-     */
-    _onSalaryAddClick = () => {
-        //noinspection JSUnresolvedVariable
-        if (typeof this.props.onSalaryAdd == "function") {
-            //noinspection JSUnresolvedFunction
-            this.props.onSalaryAdd();
-        }
     };
 
     _hideModal() {
@@ -112,6 +85,13 @@ class DetailEmployeeModal extends ModalWrapper {
     _onCancelClick = () => {
         this._hideModal();
     };
+
+    _onSalaryAdd = (salary) => {
+        this.props.onSalaryAdd({
+            ...salary,
+            employeeId: this.props.employee.id
+        })
+    }
 
     /**
      *
@@ -132,7 +112,7 @@ class DetailEmployeeModal extends ModalWrapper {
                 <div className="col-sm-6">
                     <h4>Personal info</h4>
                     {this._renderEmployeeInfo()}
-                    <Button className="text-xs-left" onClick={this._onSalaryAddClick} children="Add salary"/>
+                    <AddSalaryForm onAdd={this._onSalaryAdd}/>
                 </div>
                 <div className="col-sm-6">
                     <h4>Salaries</h4>
@@ -148,5 +128,77 @@ class DetailEmployeeModal extends ModalWrapper {
         return super.renderWrapper(modal);
     }
 }
+
+class AddSalaryForm extends React.Component {
+
+    constructor(props) {
+        super(props);
+
+        this.state = {
+            formVisible: false,
+            salary: 0,
+            date: new Date()
+        }
+    }
+
+    _onDateChange = (date) => {
+        if (Number.isNaN(Date.parse(date)) == false) {
+            this.setState({date: Date.parse(date)});
+        }
+    }
+
+    _onSave = () => {
+        this.setState({formVisible: false});
+        this.props.onAdd({
+            salary: this.state.salary,
+            date: new Date(this.state.date)
+        })
+    }
+
+    render() {
+        if (!this.state.formVisible)
+            return <Button
+                className="btn-block"
+                children="Add salary"
+                onClick={() => this.setState({formVisible: true})}
+            />;
+
+        const date = new Date(this.state.date);
+
+        const padWithZero = (number) => {
+            return ('0' + number).slice(-2);
+        };
+
+        const dateString = `${date.getFullYear()}-${padWithZero(date.getMonth() + 1)}-${padWithZero(date.getDate())}`;
+
+        return <div>
+
+            <h4>Salary </h4>
+
+            <InputGroup
+                type="number"
+                label="Salary:"
+                value={this.state.salary}
+                onChange={(salary) => this.setState({salary})}
+            />
+
+            <InputGroup
+                label="Date:"
+                type="date"
+                value={dateString}
+                onChange={this._onDateChange}
+            />
+
+            <Button
+                type="success"
+                children="Save"
+                className="btn-block"
+                onClick={this._onSave}
+            />
+
+        </div>
+    }
+}
+;
 
 export {DetailEmployeeModal};

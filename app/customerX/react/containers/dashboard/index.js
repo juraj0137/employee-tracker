@@ -1,6 +1,6 @@
 import React from "react";
 
-import {Api} from '../../utils'
+import {EmployeeApi, SalaryApi} from '../../utils'
 
 import {Navbar} from "../../components/navbar"
 import {EmployeeList} from "../../components/employee-list"
@@ -28,6 +28,8 @@ class Dashboard extends React.Component {
             employee: null,
             employees: {},
             employeeIds: [],
+            salaries: {},
+            salariesByEmployeeId: {}
         };
     }
 
@@ -35,20 +37,50 @@ class Dashboard extends React.Component {
      *
      */
     componentDidMount() {
-        Api.loadEmployees().then(employees => {
+        EmployeeApi
+            .loadEmployees()
+            .then(employees => {
 
-            const employeesById = employees.reduce((prev, next) => {
-                prev[next.id] = next;
-                return prev;
-            }, {});
+                const employeesById = employees.reduce((prev, next) => {
+                    prev[next.id] = next;
+                    return prev;
+                }, {});
 
-            this.setState({
-                employees: employeesById,
-                employeeIds: Object.keys(employeesById)
-            });
-        });
+                const employeeIds = Object.keys(employeesById);
+
+                this.setState({
+                    employees: employeesById,
+                    employeeIds: employeeIds
+                });
+
+                return employeeIds;
+            })
+            .then(this._loadSalariesForEmployees);
 
     }
+
+    _loadSalariesForEmployees = (employeeIds, options = {}) => {
+        return SalaryApi
+            .loadSalariesByEmployeeIds(employeeIds, options)
+            .then(salaries => {
+
+                const salariesById = salaries.reduce((prev, next) => {
+                    prev[next.id] = next;
+                    return prev;
+                }, {});
+
+                const salariesIdsByEmployee = salaries.reduce((prev, next) => {
+                    prev[next.employeeId] = prev[next.employeeId] || [];
+                    prev[next.employeeId].push(next.id);
+                    return prev;
+                }, {});
+
+                this.setState({
+                    salaries: {...this.state.salaries, ...salariesById},
+                    salariesByEmployeeId: {...this.state.salariesByEmployeeId, ...salariesIdsByEmployee}
+                })
+            });
+    };
 
     /**
      *
@@ -77,7 +109,7 @@ class Dashboard extends React.Component {
      */
     _onNewEmployeeSave = (values)=> {
 
-        Api.saveEmployee(values)
+        EmployeeApi.saveEmployee(values)
             .then(employee =>
                 this.setState({
                     employees: {...this.state.employees, [employee.id]: employee},
@@ -94,6 +126,7 @@ class Dashboard extends React.Component {
      */
     _onDetailEmployeeClick = (employee) => {
         this.setState({employee}, () => {
+            this._loadSalariesForEmployees([employee.id]);
             this.refs[REF_MODAL_DETAIL].showModal();
         });
     };
@@ -126,7 +159,7 @@ class Dashboard extends React.Component {
      * @private
      */
     _onEmployeeSave = (employee) => {
-        Api.updateEmployee(employee)
+        EmployeeApi.updateEmployee(employee)
             .then((employee) => this.setState({
                 employees: {...this.state.employees, [employee.id]: employee},
             }));
@@ -138,7 +171,7 @@ class Dashboard extends React.Component {
      * @private
      */
     _onEmployeeDelete = (employee) => {
-        Api.updateEmployee(employee)
+        EmployeeApi.deleteEmployee(employee)
             .then((employee) => {
                 const newEmployees = {...this.state.employees};
                 delete newEmployees[employee.id];
@@ -151,12 +184,39 @@ class Dashboard extends React.Component {
 
     /**
      *
+     * @param salary
+     * @private
+     */
+    _onSalarySave = (salary) => {
+        SalaryApi.saveSalary(salary)
+            .then(salary => {
+                this.setState({
+                    salaries: {...this.state.salaries, [salary.id]: salary},
+                    salariesByEmployeeId: {
+                        ...this.state.salariesByEmployeeId,
+                        [salary.employeeId]: [...this.state.salariesByEmployeeId[salary.employeeId], salary.id]
+                    }
+                })
+            })
+    }
+
+    /**
+     *
      * @returns {Array.<*>}
      * @private
      */
     _getFilteredEmployees = () => {
         return this.state.employeeIds
-            .map(id => this.state.employees[id])
+            .map(id => {
+                const employee = this.state.employees[id];
+
+                if (this.state.salariesByEmployeeId[id]) {
+                    const salaryId = this.state.salariesByEmployeeId[id][0];
+                    employee.salary = this.state.salaries[salaryId].salary; // todo spravit funkciu na vratenie filtrovaneho mesiaca
+                }
+
+                return employee;
+            })
             .filter(employee => {
                 const {filterText} = this.state;
                 return !(filterText.length > 0 && employee.name.toLowerCase().search(filterText) == -1);
@@ -202,6 +262,9 @@ class Dashboard extends React.Component {
                 title="Detail"
                 ref={REF_MODAL_DETAIL}
                 employee={this.state.employee}
+                salaries={this.state.salaries}
+                onSalaryAdd={this._onSalarySave}
+                salariesByEmployeeId={this.state.salariesByEmployeeId}
             />
 
             <RemoveEmployeeModal

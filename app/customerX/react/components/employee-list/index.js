@@ -65,12 +65,11 @@ class EmployeeList extends React.Component {
      * @private
      */
     _renderRow = (employee, key) => {
-        const salary = (1500 + Math.random() * 1000).toFixed(2);
         return <tr key={key} onClick={(e) => this._onRowClick(e, employee)}>
             <td>{employee.name}</td>
             <td>{employee.email}</td>
             <td>{employee.phone}</td>
-            <td style={{width: '150px', textAlign: 'right'}}>{salary} <span className="fa fa-eur"/></td>
+            <td style={{width: '150px', textAlign: 'right'}}>{employee.salary && employee.salary.toFixed(2)} <span className="fa fa-eur"/></td>
             <td className="actions-column">
                 <button className="btn btn-link btn-sm" onClick={(e) => this._onEditClick(e, employee)}>
                     <i className="fa fa-pencil"/> Edit
