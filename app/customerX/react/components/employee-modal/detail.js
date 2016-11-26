@@ -11,6 +11,14 @@ import {ModalWrapper} from './wrapper';
  */
 class DetailEmployeeModal extends ModalWrapper {
 
+    constructor(props) {
+        super(props);
+
+        this.state = {
+            editedSalary: null
+        }
+    }
+
     /**
      *
      * @returns {XML}
@@ -50,21 +58,31 @@ class DetailEmployeeModal extends ModalWrapper {
             return;
 
         const rows = salariesByEmployeeId[employee.id]
-            .map((salaryId, i) => {
-                const salary = salaries[salaryId];
+            .map((salaryId) => salaries[salaryId])
+            .sort((a, b) => b.date - a.date)
+            .map((salary, i) => {
                 const date = `${salary.date.getDate()}.${salary.date.getMonth() + 1}.${salary.date.getFullYear()}`;
                 return <tr key={i}>
                     <td>{date}</td>
                     <td>{salary.salary}E</td>
+                    <td className="actions-column">
+                        <button className="btn btn-link btn-sm" onClick={() => this.setState({editedSalary: salary})}>
+                            <i className="fa fa-pencil"/>
+                        </button>
+                        <button className="btn btn-link btn-sm" onClick={(e) => this._onDeleteClick(e, salary)}>
+                            <i className="fa fa-trash-o"/>
+                        </button>
+                    </td>
                 </tr>;
             });
 
-        return <div className="salary-wrapper">
+        return <div className="salary-list-wrapper">
             <table className="table">
                 <thead>
                 <tr>
                     <th>Month</th>
                     <th>Salary</th>
+                    <th>Actions</th>
                 </tr>
                 </thead>
                 <tbody>
@@ -87,10 +105,14 @@ class DetailEmployeeModal extends ModalWrapper {
     };
 
     _onSalaryAdd = (salary) => {
+
         this.props.onSalaryAdd({
+            ...this.state.editedSalary,
             ...salary,
-            employeeId: this.props.employee.id
-        })
+            employeeId: this.props.employee.id,
+        });
+
+        this.setState({editedSalary: null});
     }
 
     /**
@@ -103,7 +125,7 @@ class DetailEmployeeModal extends ModalWrapper {
         if (this.props.employee == null)
             return null;
 
-        const modal = <div className="modal-content">
+        const modal = <div className="modal-content detail">
             <div className="modal-header">
                 <h4 className="modal-title">{this.props.title}</h4>
             </div>
@@ -112,7 +134,7 @@ class DetailEmployeeModal extends ModalWrapper {
                 <div className="col-sm-6">
                     <h4>Personal info</h4>
                     {this._renderEmployeeInfo()}
-                    <AddSalaryForm onAdd={this._onSalaryAdd}/>
+                    <AddSalaryForm onAdd={this._onSalaryAdd} salary={this.state.editedSalary}/>
                 </div>
                 <div className="col-sm-6">
                     <h4>Salaries</h4>
@@ -138,6 +160,25 @@ class AddSalaryForm extends React.Component {
             formVisible: false,
             salary: 0,
             date: new Date()
+        }
+    }
+
+    componentWillReceiveProps(nextProps) {
+        if (nextProps.salary == null) {
+            this.setState({
+                salary: 0,
+                date: new Date(),
+                formVisible: false,
+            })
+            return;
+        }
+
+        if (nextProps.salary != null && this.state.salary != nextProps.salary.salary && this.state.date != nextProps.salary.date) {
+            this.setState({
+                salary: nextProps.salary.salary,
+                date: new Date(nextProps.salary.date),
+                formVisible: true,
+            })
         }
     }
 

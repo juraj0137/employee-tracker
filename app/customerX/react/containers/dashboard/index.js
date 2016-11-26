@@ -188,16 +188,27 @@ class Dashboard extends React.Component {
      * @private
      */
     _onSalarySave = (salary) => {
-        SalaryApi.saveSalary(salary)
-            .then(salary => {
-                this.setState({
-                    salaries: {...this.state.salaries, [salary.id]: salary},
-                    salariesByEmployeeId: {
-                        ...this.state.salariesByEmployeeId,
-                        [salary.employeeId]: [...this.state.salariesByEmployeeId[salary.employeeId], salary.id]
-                    }
+        console.log('method');
+        if (typeof salary.id != "undefined")
+            SalaryApi.updateSalary(salary)
+                .then(salary => {
+                    console.log('update', salary);
+                    this.setState({
+                        salaries: {...this.state.salaries, [salary.id]: salary},
+                    })
+                });
+        else
+            SalaryApi.saveSalary(salary)
+                .then(salary => {
+                    console.log('save');
+                    this.setState({
+                        salaries: {...this.state.salaries, [salary.id]: salary},
+                        salariesByEmployeeId: {
+                            ...this.state.salariesByEmployeeId,
+                            [salary.employeeId]: [...this.state.salariesByEmployeeId[salary.employeeId], salary.id]
+                        }
+                    })
                 })
-            })
     }
 
     /**

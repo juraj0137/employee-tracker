@@ -1,4 +1,4 @@
-.detail .salary-wrapper {
+.detail .salary-list-wrapper {
 
   table {
     width: 100%;
@@ -6,6 +6,7 @@
 
   thead, tbody, tr, td, th {
     display: block;
+    text-align: center;
   }
 
   tr:after {
@@ -25,7 +26,21 @@
   }
 
   tbody td, thead th {
-    width: 50%;
+    width: 33.33333%;
     float: left;
   }
+}
+
+.detail .salary-list-wrapper {
+
+  table .actions-column {
+    button {
+      visibility: hidden;
+    }
+  }
+
+  table tr:hover .actions-column button {
+    visibility: visible;
+  }
+
 }

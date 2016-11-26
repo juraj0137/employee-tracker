@@ -69,7 +69,7 @@ class EmployeeList extends React.Component {
             <td>{employee.name}</td>
             <td>{employee.email}</td>
             <td>{employee.phone}</td>
-            <td style={{width: '150px', textAlign: 'right'}}>{employee.salary && employee.salary.toFixed(2)} <span className="fa fa-eur"/></td>
+            <td>{employee.salary && parseInt(employee.salary).toFixed(2)} <span className="fa fa-eur"/></td>
             <td className="actions-column">
                 <button className="btn btn-link btn-sm" onClick={(e) => this._onEditClick(e, employee)}>
                     <i className="fa fa-pencil"/> Edit
@@ -88,7 +88,7 @@ class EmployeeList extends React.Component {
      */
     _renderHead = () => {
 
-        const columns = ['Name', 'Email', 'Phone', 'Month salary', ''];
+        const columns = ['Name', 'Email', 'Phone', 'Month salary', 'Actions'];
 
         return <thead>
         <tr>{columns.map((column, i) => <th key={i}>{column}</th>)}</tr>

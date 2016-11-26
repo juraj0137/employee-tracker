@@ -80,6 +80,13 @@ class SalaryApi {
             return salary;
         });
     }
+
+    static updateSalary(salary) {
+        return delay(500).then(() => {
+            // api call
+            return salary;
+        });
+    }
 }
 
 export {
