@@ -87,6 +87,13 @@ class SalaryApi {
             return salary;
         });
     }
+
+    static deleteSalary(salary) {
+        return delay(500).then(() => {
+            // api call
+            return salary;
+        });
+    }
 }
 
 export {

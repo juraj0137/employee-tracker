@@ -188,11 +188,9 @@ class Dashboard extends React.Component {
      * @private
      */
     _onSalarySave = (salary) => {
-        console.log('method');
         if (typeof salary.id != "undefined")
             SalaryApi.updateSalary(salary)
                 .then(salary => {
-                    console.log('update', salary);
                     this.setState({
                         salaries: {...this.state.salaries, [salary.id]: salary},
                     })
@@ -200,7 +198,6 @@ class Dashboard extends React.Component {
         else
             SalaryApi.saveSalary(salary)
                 .then(salary => {
-                    console.log('save');
                     this.setState({
                         salaries: {...this.state.salaries, [salary.id]: salary},
                         salariesByEmployeeId: {
@@ -209,7 +206,29 @@ class Dashboard extends React.Component {
                         }
                     })
                 })
-    }
+    };
+
+    /**
+     *
+     * @param salary
+     * @private
+     */
+    _onSalaryDelete = (salary) => {
+        SalaryApi.deleteSalary(salary)
+            .then(salary => {
+
+                const salaries = {...this.state.salaries};
+                delete salaries[salary.id];
+
+                this.setState({
+                    salaries: salaries,
+                    salariesByEmployeeId: {
+                        ...this.state.salariesByEmployeeId,
+                        [salary.employeeId]: this.state.salariesByEmployeeId[salary.employeeId].filter(id => id !== salary.id)
+                    }
+                })
+            })
+    };
 
     /**
      *
@@ -223,7 +242,7 @@ class Dashboard extends React.Component {
 
                 if (this.state.salariesByEmployeeId[id]) {
                     const salaryId = this.state.salariesByEmployeeId[id][0];
-                    employee.salary = this.state.salaries[salaryId].salary; // todo spravit funkciu na vratenie filtrovaneho mesiaca
+                    employee.salary = this.state.salaries[salaryId].salary;
                 }
 
                 return employee;
@@ -275,6 +294,7 @@ class Dashboard extends React.Component {
                 employee={this.state.employee}
                 salaries={this.state.salaries}
                 onSalaryAdd={this._onSalarySave}
+                onSalaryDelete={this._onSalaryDelete}
                 salariesByEmployeeId={this.state.salariesByEmployeeId}
             />
 
