@@ -1,3 +1,4 @@
+import './style.less';
 import React from "react";
 
 import {EmployeeApi, SalaryApi} from '../../utils'
@@ -260,6 +261,15 @@ class Dashboard extends React.Component {
      */
     render() {
 
+        const employeesData = this._getFilteredEmployees();
+
+        let totalSalary = employeesData.reduce((prev, next) => prev + next.salary, 0);
+
+        if (Number.isNaN(totalSalary))
+            totalSalary = 0;
+
+        const averageSalary = totalSalary / employeesData.length;
+
         return <div>
             <Navbar
                 onFilterChange={this._onFilterChange}
@@ -267,8 +277,16 @@ class Dashboard extends React.Component {
             />
 
             <div className="container" style={{marginTop: '100px'}}>
+
+                <div className="row">
+                    <div className="col-xs-12 text-xs-right" style={{paddingBottom: '20px'}}>
+                        Total salary: <b>{totalSalary.toFixed(2)}</b> <span className="fa fa-eur"/> !
+                        Average salary: <b>{averageSalary.toFixed(2)}</b> <span className="fa fa-eur"/>
+                    </div>
+                </div>
+
                 <EmployeeList
-                    data={this._getFilteredEmployees()}
+                    data={employeesData}
                     onDeleteClick={this._onDeleteEmployeeClick}
                     onEditClick={this._onEditEmployeeClick}
                     onRowClick={this._onDetailEmployeeClick}

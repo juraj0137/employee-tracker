@@ -49,7 +49,7 @@ class SalaryTableRow extends React.Component {
 
         return <tr>
             <td>{formattedDate}</td>
-            <td>{salary}E</td>
+            <td>{salary} <span className="fa fa-eur"/></td>
             {this.state.formVisible ? this._renderConfirmationForm() : this._renderActionButtons()}
         </tr>;
     }
