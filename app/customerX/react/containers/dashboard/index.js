@@ -24,7 +24,15 @@ class Dashboard extends React.Component {
     constructor(props) {
         super(props);
 
+        const month = new Date();
+        month.setDate(1);
+        month.setHours(0);
+        month.setMinutes(0);
+        month.setSeconds(0);
+        month.setMilliseconds(0);
+
         this.state = {
+            filteredMonth: month,
             filterText: '',
             employee: null,
             employees: {},
@@ -38,6 +46,7 @@ class Dashboard extends React.Component {
      *
      */
     componentDidMount() {
+
         EmployeeApi
             .loadEmployees()
             .then(employees => {
@@ -56,10 +65,34 @@ class Dashboard extends React.Component {
 
                 return employeeIds;
             })
-            .then(this._loadSalariesForEmployees);
+            .then(employeeIds => this._loadSalariesForEmployeesForCurrentMonth(employeeIds));
 
     }
 
+    /**
+     *
+     * @param employeeIds
+     * @private
+     */
+    _loadSalariesForEmployeesForCurrentMonth = (employeeIds = this.state.employeeIds) => {
+
+        const nextMonth = new Date(this.state.filteredMonth);
+        nextMonth.setMonth(nextMonth.getMonth() + 1);
+        const salaryQueryParams = {
+            dateFrom: this.state.filteredMonth,
+            dateTo: nextMonth
+        };
+
+        this._loadSalariesForEmployees(employeeIds, salaryQueryParams);
+    };
+
+    /**
+     *
+     * @param employeeIds
+     * @param options
+     * @return {Promise.<TResult>|Request|Promise|*}
+     * @private
+     */
     _loadSalariesForEmployees = (employeeIds, options = {}) => {
         return SalaryApi
             .loadSalariesByEmployeeIds(employeeIds, options)
@@ -72,9 +105,10 @@ class Dashboard extends React.Component {
 
                 const salariesIdsByEmployee = salaries.reduce((prev, next) => {
                     prev[next.employeeId] = prev[next.employeeId] || [];
-                    prev[next.employeeId].push(next.id);
+                    if (prev[next.employeeId].indexOf(next.id) == -1)
+                        prev[next.employeeId] = [...prev[next.employeeId], next.id];
                     return prev;
-                }, {});
+                }, {...this.state.salariesByEmployeeId});
 
                 this.setState({
                     salaries: {...this.state.salaries, ...salariesById},
@@ -199,11 +233,15 @@ class Dashboard extends React.Component {
         else
             SalaryApi.saveSalary(salary)
                 .then(salary => {
+                    let salariesByEmployeeId = typeof this.state.salariesByEmployeeId[salary.employeeId] !== "undefined" ?
+                        [...this.state.salariesByEmployeeId[salary.employeeId], salary.id] :
+                        [salary.id];
+
                     this.setState({
                         salaries: {...this.state.salaries, [salary.id]: salary},
                         salariesByEmployeeId: {
                             ...this.state.salariesByEmployeeId,
-                            [salary.employeeId]: [...this.state.salariesByEmployeeId[salary.employeeId], salary.id]
+                            [salary.employeeId]: salariesByEmployeeId
                         }
                     })
                 })
@@ -239,11 +277,20 @@ class Dashboard extends React.Component {
     _getFilteredEmployees = () => {
         return this.state.employeeIds
             .map(id => {
-                const employee = this.state.employees[id];
+                const employee = {...this.state.employees[id]};
 
                 if (this.state.salariesByEmployeeId[id]) {
-                    const salaryId = this.state.salariesByEmployeeId[id][0];
-                    employee.salary = this.state.salaries[salaryId].salary;
+
+                    const month = new Date(this.state.filteredMonth);
+                    const nextMonth = new Date(month);
+                    nextMonth.setMonth(nextMonth.getMonth() + 1);
+
+                    const salaryIds = this.state.salariesByEmployeeId[id];
+                    const salaries = salaryIds.map(id => this.state.salaries[id])
+                        .filter(t => (t.date >= month && t.date < nextMonth));
+
+                    if(salaries.length > 0)
+                        employee.salary = salaries[0].salary;
                 }
 
                 return employee;
@@ -263,15 +310,20 @@ class Dashboard extends React.Component {
 
         const employeesData = this._getFilteredEmployees();
 
-        let totalSalary = employeesData.reduce((prev, next) => prev + next.salary, 0);
-
+        let totalSalary = employeesData.reduce((prev, next) => prev + parseInt(next.salary), 0);
         if (Number.isNaN(totalSalary))
             totalSalary = 0;
-
-        const averageSalary = totalSalary / employeesData.length;
+        
+        let averageSalary = totalSalary / employeesData.length;
+        if (Number.isNaN(averageSalary))
+            averageSalary = 0;
 
         return <div>
             <Navbar
+                month={this.state.filteredMonth}
+                onMonthChange={(filteredMonth) => {
+                    this.setState({filteredMonth}, () => this._loadSalariesForEmployeesForCurrentMonth());
+                }}
                 onFilterChange={this._onFilterChange}
                 onAddEmployeeClick={this._onAddEmployeeClick}
             />

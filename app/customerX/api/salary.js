@@ -44,6 +44,7 @@ const createSalary = (req, res) => {
 };
 
 const deleteSalaries = (req, res) => {
+    console.log(req.body);
     if (!(req.body instanceof Array)) {
         res.json({message: "You must send array of salaries!"});
     } else {
@@ -93,12 +94,12 @@ const getSalariesByQuery = (req, res) => {
 
     if (typeof req.body.dateFrom == "string") {
         queryParams.date = queryParams.date || {};
-        queryParams.date['$gte'] = new Date(req.query.dateFrom).toISOString();
+        queryParams.date['$gte'] = new Date(req.body.dateFrom.toString()).toISOString();
     }
 
     if (typeof req.body.dateTo == "string") {
         queryParams.date = queryParams.date || {};
-        queryParams.date['$lt'] = new Date(req.query.dateTo).toISOString();
+        queryParams.date['$lt'] = new Date(req.body.dateTo).toISOString();
     }
 
     if (typeof req.body.employeeIds == "object") {

@@ -40,11 +40,13 @@ class SalaryTableRow extends React.Component {
     };
 
     render() {
-
-        if (this.props.salary == null)
-            return null;
-
         const {date, salary} = this.props.salary;
+
+        if (salary == null || date == null)
+            return null;
+        
+        console.log(date);
+
         const formattedDate = `${date.getDate()}.${date.getMonth() + 1}.${date.getFullYear()}`;
 
         return <tr>

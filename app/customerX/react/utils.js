@@ -1,97 +1,144 @@
 import {v4} from 'node-uuid';
-/**
- * Created by jkubala on 11/23/16.
- */
+import axios from 'axios';
+import {config} from '../config'
 
 const delay = (ms) =>
     new Promise(resolve => setTimeout(resolve, ms));
 
+const BASE_URL_EMPLOYEE = `/${config.customer.ID}/api/employee`;
+const BASE_URL_SALARY = `/${config.customer.ID}/api/salary`;
+
+const convertFromDb = (db) => {
+    const data = db;
+    data.id = db._id;
+    return data;
+};
+
+const convertToDb = (data) => {
+    const db = data;
+    db._id = data.id;
+    return db;
+};
+
 class EmployeeApi {
 
     static saveEmployee(employee) {
-        return delay(500).then(() => {
-
-            // api call
-            employee.id = v4();
-            return employee;
-        });
+        return axios
+            .post(BASE_URL_EMPLOYEE, employee)
+            .then(response => {
+                const {status, data} = response;
+                if (status == 200) {
+                    return convertFromDb(data.employee);
+                } else {
+                    return null;
+                }
+            });
     }
 
     static updateEmployee(employee) {
-        return delay(500).then(() => {
-            return employee;
-        });
+
+        return axios
+            .put(BASE_URL_EMPLOYEE, [convertToDb(employee)])
+            .then(response => {
+                const {status} = response;
+                if (status == 200) {
+                    return employee
+                }
+            });
     }
 
     static loadEmployees() {
 
-        return delay(500).then(() => {
-
-            let employees = [];
-            for (let i = 0; i < 10; i++) {
-                employees.push(generateEmployee())
-            }
-
-            return employees;
-        });
+        return axios
+            .get(BASE_URL_EMPLOYEE)
+            .then(response => {
+                const {status, data} = response;
+                if (status == 200) {
+                    return data.map(employee => convertFromDb(employee));
+                }
+            });
     }
 
     static deleteEmployee(employee) {
-        return delay(500).then(() => {
-            return employee;
-        });
+        return axios
+            .delete(BASE_URL_EMPLOYEE + '/' + employee.id)
+            .then(response => {
+                const {status} = response;
+                if (status == 200) {
+                    return employee;
+                }
+            });
     }
 }
 
 class SalaryApi {
 
-    static salaries = []
+    static salaries = [];
 
     static loadSalariesByEmployeeIds(ids, options = {}) {
 
-        return delay(500).then(() => {
+        const queryParams = {};
 
-            if (this.salaries.length == 0)
-                ids.forEach(id => {
-                    for (let i = 0; i < 11; i++) {
-                        this.salaries.push(generateSalary(id, i));
-                    }
-                });
+        if (options.dateFrom)
+            queryParams.dateFrom = new Date(options.dateFrom).toDateString();
 
-            return this.salaries.filter(salary => {
+        if (options.dateTo)
+            queryParams.dateTo = new Date(options.dateTo).toDateString();
 
-                if (options.dateFrom instanceof Date && salary.date < options.dateFrom)
-                    return false;
+        if (options.employeeIds)
+            queryParams.employeeIds = employeeIds;
 
-                if (options.dateTo instanceof Date && salary.date >= options.dateTo)
-                    return false;
-
-                return true;
+        return axios
+            .post(BASE_URL_SALARY, queryParams)
+            .then(response => {
+                const {status, data} = response;
+                if (status == 200) {
+                    return data.map(salary => {
+                        salary = convertFromDb(salary);
+                        salary.date = new Date(salary.date);
+                        return salary;
+                    });
+                }
             });
-        });
     }
 
 
     static saveSalary(salary) {
-        return delay(500).then(() => {
-
-            // api call
-            salary.id = v4();
-            return salary;
-        });
+        return axios
+            .post(BASE_URL_SALARY + '/' + salary.employeeId, salary)
+            .then(response => {
+                const {status, data} = response;
+                if (status == 200) {
+                    let salary = convertFromDb(data.salary);
+                    salary.date = new Date(salary.date);
+                    return salary;
+                }
+            });
     }
 
     static updateSalary(salary) {
-        return delay(500).then(() => {
-            // api call
-            return salary;
-        });
+
+        return axios
+            .put(BASE_URL_SALARY, [convertToDb(salary)])
+            .then(response => {
+                const {status, data} = response;
+                if (status == 200) {
+                    return salary;
+                }
+            });
     }
 
     static deleteSalary(salary) {
-        return delay(500).then(() => {
-            // api call
-            return salary;
+
+        return axios({
+            method: 'delete',
+            url: BASE_URL_SALARY,
+            data: [convertToDb(salary)]
+        }).then(response => {
+            const {status} = response;
+            if (status == 200) {
+                return salary;
+            }
         });
     }
 }
@@ -101,12 +148,25 @@ export {
     SalaryApi,
 }
 
+export const generateData = (count = 15) => {
+    for (let i = 0; i < count; i++) {
+        EmployeeApi.saveEmployee(generateEmployee())
+            .then(emplyee => {
+                if (emplyee !== null) {
+                    for (let month = 0; month < 12; month++) {
+                        let salary = generateSalary(emplyee.id, month);
+                        SalaryApi.saveSalary(salary);
+                    }
+                }
+            })
+    }
+};
+
 const generateSalary = (employeeId, month = 0) => {
     const rand = (arr) => arr[Math.floor(Math.random() * arr.length)];
     const date = new Date();
     date.setMonth(date.getMonth() - month);
     return {
-        id: v4(),
         employeeId: employeeId,
         salary: Math.floor(Math.random() * 1000) + 1500,
         date: date
@@ -117,7 +177,6 @@ const generateEmployee = () => {
     const rand = (arr) => arr[Math.floor(Math.random() * arr.length)];
 
     return {
-        id: v4(),
         name: rand(names),
         phone: rand(phones),
         address: rand(addresses),

@@ -15,19 +15,30 @@ class Navbar extends React.Component {
 
     last24Months() {
         let months = [];
+
+
         for (let i = 0; i < 24; i++) {
             let date = new Date();
             date.setMonth(date.getMonth() - i);
+            date.setDate(1);
+            date.setHours(0);
+            date.setMinutes(0);
+            date.setSeconds(0);
+            date.setMilliseconds(0);
             months.push(date);
         }
+
         return months.map((month, key) => {
-            return <a key={key} className="dropdown-item">
+            return <a key={key} className="dropdown-item" onClick={() => this.props.onMonthChange(month) }>
                 {`${month.getMonth() + 1}.${month.getFullYear()}`}
             </a>;
         })
     }
 
     render() {
+
+        const month = new Date(this.props.month);
+
         return <nav className="navbar navbar-light bg-faded navbar-fixed-top">
 
             <span className="navbar-brand">Salary tracker</span>
@@ -36,7 +47,7 @@ class Navbar extends React.Component {
                 <li className="nav-item dropdown">
                     <a className="nav-link dropdown-toggle"
                        id="monthFilter"
-                       data-toggle="dropdown">Month filter</a>
+                       data-toggle="dropdown">{`${month.getMonth() + 1}.${month.getFullYear()}`}</a>
 
                     <div className="dropdown-menu" aria-labelledby="monthFilter">
                         {this.last24Months()}
