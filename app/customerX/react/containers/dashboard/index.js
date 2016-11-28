@@ -277,6 +277,7 @@ class Dashboard extends React.Component {
         return this.state.employeeIds
             .map(id => {
                 const employee = {...this.state.employees[id]};
+                employee.salary = 0;
 
                 if (this.state.salariesByEmployeeId[id]) {
 
