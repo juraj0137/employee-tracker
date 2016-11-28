@@ -44,7 +44,6 @@ const createSalary = (req, res) => {
 };
 
 const deleteSalaries = (req, res) => {
-    console.log(req.body);
     if (!(req.body instanceof Array)) {
         res.json({message: "You must send array of salaries!"});
     } else {

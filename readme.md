@@ -1,5 +1,22 @@
 # Employee salary tracker
 
+# Usage
+test
+
+    npm test
+
+build
+
+    npm run build
+      --- or ---
+    npm run build:dev
+
+run
+
+    npm run start
+      --- or ---
+    npm run start:dev
+
 # Instalation MongoDB
 ##Ubuntu
 
