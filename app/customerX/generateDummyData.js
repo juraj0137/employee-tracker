@@ -4,5 +4,5 @@
 
 require('babel-register');
 
-let Utils = require('./react/utils');
+const Utils = require('./react/utils');
 Utils.generateData(15);

@@ -6,6 +6,26 @@ import React from "react";
  */
 class EmployeeList extends React.Component {
 
+    constructor(props) {
+        super(props);
+
+        this.state = {
+            order: '',
+            filterCol: '',
+            employees: props.data || []
+        }
+    }
+
+    /**
+     *
+     * @param nextProps
+     */
+    componentWillReceiveProps(nextProps) {
+        if (this.state.employees != nextProps.data) {
+            this.setState({employees: nextProps.data});
+        }
+    }
+
     /**
      *
      * @param {MouseEvent} e
@@ -65,11 +85,12 @@ class EmployeeList extends React.Component {
      * @private
      */
     _renderRow = (employee, key) => {
+        let salary = employee.salary || 0;
         return <tr key={key} onClick={(e) => this._onRowClick(e, employee)}>
             <td>{employee.name}</td>
             <td>{employee.email}</td>
             <td>{employee.phone}</td>
-            <td>{employee.salary && parseInt(employee.salary).toFixed(2)} <span className="fa fa-eur"/></td>
+            <td>{parseInt(salary).toFixed(2)} <span className="fa fa-eur"/></td>
             <td className="actions-column">
                 <button className="btn btn-link btn-sm" onClick={(e) => this._onEditClick(e, employee)}>
                     <i className="fa fa-pencil"/> Edit
@@ -81,6 +102,19 @@ class EmployeeList extends React.Component {
         </tr>
     };
 
+    _onSetFilter = (columnKey) => {
+
+        const {order, filterCol} = this.state;
+
+        if (filterCol == '') {
+            this.setState({filterCol: columnKey, order: 'asc'});
+        } else if (filterCol == columnKey) {
+            this.setState({order: order == 'asc' ? 'desc' : 'asc'});
+        } else {
+            this.setState({filterCol: columnKey, order: 'asc'});
+        }
+    };
+
     /**
      *
      * @returns {XML}
@@ -88,11 +122,58 @@ class EmployeeList extends React.Component {
      */
     _renderHead = () => {
 
-        const columns = ['Name', 'Email', 'Phone', 'Month salary', 'Actions'];
+        const columns = {
+            name: 'Name',
+            email: 'Email',
+            phone: 'Phone',
+            salary: 'Month salary',
+            action: 'Actions'
+        };
 
         return <thead>
-        <tr>{columns.map((column, i) => <th key={i}>{column}</th>)}</tr>
+        <tr>
+            {
+                Object.keys(columns).map((key) =>
+                    <ColumnHeader
+                        key={key}
+                        onClick={() => this._onSetFilter(key)}
+                        filterValue={this.state.filterCol}
+                        columnValue={key}
+                        order={this.state.order}
+                    >
+                        {columns[key]}
+                    </ColumnHeader>
+                )
+            }
+        </tr>
         </thead>;
+    };
+
+    /**
+     *
+     * @private
+     */
+    _getFilteredData = () => {
+        if (!(this.state.employees instanceof Array))
+            return [];
+
+        const {filterCol, order, employees} = this.state;
+
+        if (filterCol) {
+            return employees.sort((colA, colB) => {
+                let a = colA[filterCol];
+                let b = colB[filterCol];
+
+                if (typeof a == "number")
+                    return (order == 'desc' ? b - a : a - b);
+                if (typeof a == "string") {
+                    return order == 'desc' ? b.localeCompare(a) : a.localeCompare(b);
+                }
+
+            });
+        }
+
+        return employees;
     };
 
     /**
@@ -107,7 +188,7 @@ class EmployeeList extends React.Component {
                 {this._renderHead()}
 
                 <tbody>
-                {this.props.data.map(this._renderRow)}
+                {this._getFilteredData().map(this._renderRow)}
                 </tbody>
 
             </table>
@@ -117,3 +198,21 @@ class EmployeeList extends React.Component {
 }
 
 export {EmployeeList};
+
+
+const ColumnHeader = (props) => {
+
+    let styles = [];
+    let icon = null;
+
+    if (typeof props.onClick == "function") {
+        styles.push('filtered');
+
+        if (props.columnValue == props.filterValue) {
+            let order = props.order ? '-' + props.order : '';
+            icon = <i className={`fa fa-sort${order}`}/>;
+        }
+    }
+
+    return <th onClick={props.onClick} className={styles.join(' ')}>{props.children}{icon}</th>
+};

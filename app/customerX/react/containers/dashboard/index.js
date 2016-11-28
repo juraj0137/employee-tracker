@@ -288,7 +288,7 @@ class Dashboard extends React.Component {
                     const salaries = salaryIds.map(id => this.state.salaries[id])
                         .filter(t => (t.date >= month && t.date < nextMonth));
 
-                    if(salaries.length > 0)
+                    if (salaries.length > 0)
                         employee.salary = salaries[0].salary;
                 }
 
@@ -296,7 +296,18 @@ class Dashboard extends React.Component {
             })
             .filter(employee => {
                 const {filterText} = this.state;
-                return !(filterText.length > 0 && employee.name.toLowerCase().search(filterText) == -1);
+                const {name, email = '', phone = '', address = ''} = employee;
+
+                if (filterText.length == 0)
+                    return true;
+
+                if (name.toLowerCase().search(filterText) !== -1 ||
+                    email.toLowerCase().search(filterText) !== -1 ||
+                    phone.toLowerCase().search(filterText) !== -1 ||
+                    address.toLowerCase().search(filterText) !== -1
+                ) return true;
+
+                return false;
             });
     };
 
@@ -312,7 +323,7 @@ class Dashboard extends React.Component {
         let totalSalary = employeesData.reduce((prev, next) => prev + parseInt(next.salary), 0);
         if (Number.isNaN(totalSalary))
             totalSalary = 0;
-        
+
         let averageSalary = totalSalary / employeesData.length;
         if (Number.isNaN(averageSalary))
             averageSalary = 0;
