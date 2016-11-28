@@ -3,5 +3,5 @@
  */
 
 export let server = {
-    PORT: 8080
+    PORT: 80
 };
