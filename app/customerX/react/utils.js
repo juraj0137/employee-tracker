@@ -2,9 +2,6 @@ import {v4} from 'node-uuid';
 import axios from 'axios';
 import {config} from '../config'
 
-const delay = (ms) =>
-    new Promise(resolve => setTimeout(resolve, ms));
-
 const BASE_URL_EMPLOYEE = `/${config.customer.ID}/api/employee`;
 const BASE_URL_SALARY = `/${config.customer.ID}/api/salary`;
 
@@ -121,7 +118,7 @@ class SalaryApi {
         return axios
             .put(BASE_URL_SALARY, [convertToDb(salary)])
             .then(response => {
-                const {status, data} = response;
+                const {status} = response;
                 if (status == 200) {
                     return salary;
                 }
@@ -151,10 +148,10 @@ export {
 export const generateData = (count = 15) => {
     for (let i = 0; i < count; i++) {
         EmployeeApi.saveEmployee(generateEmployee())
-            .then(emplyee => {
-                if (emplyee !== null) {
+            .then(employee => {
+                if (employee !== null) {
                     for (let month = 0; month < 12; month++) {
-                        let salary = generateSalary(emplyee.id, month);
+                        let salary = generateSalary(employee.id, month);
                         SalaryApi.saveSalary(salary);
                     }
                 }
@@ -163,7 +160,6 @@ export const generateData = (count = 15) => {
 };
 
 const generateSalary = (employeeId, month = 0) => {
-    const rand = (arr) => arr[Math.floor(Math.random() * arr.length)];
     const date = new Date();
     date.setMonth(date.getMonth() - month);
     return {
@@ -182,8 +178,9 @@ const generateEmployee = () => {
         address: rand(addresses),
         email: rand(emails)
     }
-}
+};
 
+//noinspection SpellCheckingInspection
 const names = [
     "Lillian Allen",
     "Matthew Gibson",
@@ -207,6 +204,7 @@ const names = [
     "Gregory Ryan",
 ];
 
+//noinspection SpellCheckingInspection
 const emails = [
     "rgarcia0@rediff.com",
     "jbrown1@reuters.com",
@@ -230,6 +228,7 @@ const emails = [
     "fbaileyj@surveymonkey.com",
 ];
 
+//noinspection SpellCheckingInspection
 const addresses = [
     "5 Elgar Circle",
     "69751 Debs Point",
@@ -253,6 +252,7 @@ const addresses = [
     "2 Spaight Court",
 ];
 
+//noinspection SpellCheckingInspection
 const phones = [
     "93-(537)123-1968",
     "62-(160)635-1789",
@@ -274,4 +274,4 @@ const phones = [
     "33-(851)978-4623",
     "62-(419)413-2897",
     "86-(149)303-8000",
-]
+];

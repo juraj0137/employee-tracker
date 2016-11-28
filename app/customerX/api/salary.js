@@ -62,7 +62,7 @@ const deleteSalaries = (req, res) => {
             });
         });
     }
-}
+};
 
 const updateSalaries = (req, res) => {
     if (!(req.body instanceof Array)) {
@@ -85,7 +85,7 @@ const updateSalaries = (req, res) => {
             })
             .catch(e => res.send(e));
     }
-}
+};
 
 const getSalariesByQuery = (req, res) => {
 
@@ -114,7 +114,7 @@ const getSalariesByQuery = (req, res) => {
         res.json(salaries);
     });
 
-}
+};
 
 router.route('/:employeeId')
     .post(createSalary)

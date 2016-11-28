@@ -24,7 +24,7 @@ const getEmployees = (req, res) => {
 
 const postEmployee = (req, res) => {
 
-    var employee = new Employee(req.body);
+    const employee = new Employee(req.body);
 
     employee.save((err, employee) => {
         if (err)

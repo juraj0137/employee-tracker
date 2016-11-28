@@ -30,7 +30,7 @@ const stylesLoaders = (isProd) => {
             test: new RegExp(`\\.(${ext})$`)
         };
     });
-}
+};
 
 const webpackConfig = {
     devtool: 'eval',
@@ -54,7 +54,7 @@ const webpackConfig = {
         ]
     },
     plugins: plugins
-}
+};
 
 module.exports = function (isProduction = true) {
 

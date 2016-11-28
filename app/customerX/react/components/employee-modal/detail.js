@@ -56,7 +56,7 @@ class DetailEmployeeModal extends ModalWrapper {
         const {salaries, salariesByEmployeeId, employee} = this.props;
 
         if (!(salariesByEmployeeId[employee.id] instanceof Array))
-            return;
+            return null;
 
         const rows = salariesByEmployeeId[employee.id]
             .map((salaryId) => salaries[salaryId])
@@ -103,7 +103,7 @@ class DetailEmployeeModal extends ModalWrapper {
         });
 
         this.setState({editedSalary: null});
-    }
+    };
 
     /**
      *

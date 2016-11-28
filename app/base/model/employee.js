@@ -22,7 +22,7 @@ const baseSchema = {
         type: String,
         default: "",
     }
-}
+};
 
 const model = mongoose.model("Employees", new Schema(baseSchema));
 

@@ -16,7 +16,7 @@ const should = chai.should();
 
 chai.use(chaiHttp);
 
-var employee = null;
+let employee = null;
 
 const generateSalary = () => {
     return {
@@ -39,7 +39,7 @@ describe('Salaries', () => {
                 name: "Lord of Rings",
                 email: "lord@rings.com",
                 address: "Some amazing address",
-            })
+            });
             employee.save((err) => {
                 if (err)
                     reject(err);
@@ -87,7 +87,7 @@ describe('Salaries', () => {
         const twoDaysAgo = new Date(currentDate);
         twoDaysAgo.setDate(currentDate.getDate() - 2);
 
-        const saveSallaryPromise = (date) => new Promise((resolve, reject) => {
+        const saveSalaryPromise = (date) => new Promise((resolve, reject) => {
 
             date = date || currentDate;
 
@@ -116,7 +116,7 @@ describe('Salaries', () => {
         it('it should GET all salaries of employee', (done) => {
 
             Promise
-                .all([saveSallaryPromise(), saveSallaryPromise()])
+                .all([saveSalaryPromise(), saveSalaryPromise()])
                 .then(() => {
                     chai.request(server)
                         .get(`/${config.customer.ID}/api/salary/${employee.id}`)
@@ -132,7 +132,7 @@ describe('Salaries', () => {
 
         it('it should GET all salaries of employee - from date', (done) => {
             Promise
-                .all([saveSallaryPromise(currentDate), saveSallaryPromise(dayAgo), saveSallaryPromise(twoDaysAgo)])
+                .all([saveSalaryPromise(currentDate), saveSalaryPromise(dayAgo), saveSalaryPromise(twoDaysAgo)])
                 .then(() => {
                     chai.request(server)
                         .get(`/${config.customer.ID}/api/salary/${employee.id}?dateFrom=${dayAgo.toISOString()}`)
@@ -148,7 +148,7 @@ describe('Salaries', () => {
 
         it('it should GET all salaries of employee - until date', (done) => {
             Promise
-                .all([saveSallaryPromise(currentDate), saveSallaryPromise(dayAgo), saveSallaryPromise(twoDaysAgo)])
+                .all([saveSalaryPromise(currentDate), saveSalaryPromise(dayAgo), saveSalaryPromise(twoDaysAgo)])
                 .then(() => {
                     chai.request(server)
                         .get(`/${config.customer.ID}/api/salary/${employee.id}?dateTo=${dayAgo.toISOString()}`)
@@ -164,7 +164,7 @@ describe('Salaries', () => {
 
         it('it should GET all salaries of employee - date interval', (done) => {
             Promise
-                .all([saveSallaryPromise(currentDate), saveSallaryPromise(dayAgo), saveSallaryPromise(twoDaysAgo)])
+                .all([saveSalaryPromise(currentDate), saveSalaryPromise(dayAgo), saveSalaryPromise(twoDaysAgo)])
                 .then(() => {
                     chai.request(server)
                         .get(`/${config.customer.ID}/api/salary/${employee.id}?dateFrom=${dayAgo.toISOString()}&dateTo=${currentDate.toISOString()}`)
@@ -230,7 +230,7 @@ describe('Salaries', () => {
     describe('/DELETE salary', () => {
         it('it should DELETE all passed salaries', (done) => {
 
-            const saveSallary = () => new Promise((resolve, reject) => {
+            const saveSalary = () => new Promise((resolve, reject) => {
                 const salary = new Salary(generateSalary());
                 salary.save((err) => {
                     if (err)
@@ -241,7 +241,7 @@ describe('Salaries', () => {
             });
 
             Promise
-                .all([saveSallary(), saveSallary()])
+                .all([saveSalary(), saveSalary()])
                 .then((salaries) => {
                     chai.request(server)
                         .delete(`/${config.customer.ID}/api/salary`)
@@ -266,7 +266,7 @@ describe('Salaries', () => {
     describe('/POST salary', () => {
         it('it should return all salaries by query', (done) => {
 
-            const saveSallary = () => new Promise((resolve, reject) => {
+            const saveSalary = () => new Promise((resolve, reject) => {
                 const salary = new Salary(generateSalary());
                 salary.save((err) => {
                     if (err)
@@ -277,7 +277,7 @@ describe('Salaries', () => {
             });
 
             Promise
-                .all([saveSallary(), saveSallary()])
+                .all([saveSalary(), saveSalary()])
                 .then((salaries) => {
 
                     const query = {
@@ -305,7 +305,7 @@ describe('Salaries', () => {
     describe('/PUT salary', () => {
         it('it should UPDATE all passed salaries', (done) => {
 
-            const saveSallary = () => new Promise((resolve, reject) => {
+            const saveSalary = () => new Promise((resolve, reject) => {
                 const salary = new Salary(generateSalary());
                 salary.save((err) => {
                     if (err)
@@ -316,12 +316,12 @@ describe('Salaries', () => {
             });
 
             Promise
-                .all([saveSallary(), saveSallary()])
+                .all([saveSalary(), saveSalary()])
                 .then((salaries) => {
 
-                    salaries = salaries.map(sallary => {
-                        sallary.salary = 0;
-                        return sallary
+                    salaries = salaries.map(salary => {
+                        salary.salary = 0;
+                        return salary
                     });
 
                     chai.request(server)

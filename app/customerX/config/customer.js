@@ -5,4 +5,4 @@
 export let customer = {
     ID: 'customerX',
     FOLDER: 'customerX',
-}
+};

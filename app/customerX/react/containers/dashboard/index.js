@@ -90,7 +90,6 @@ class Dashboard extends React.Component {
      *
      * @param employeeIds
      * @param options
-     * @return {Promise.<TResult>|Request|Promise|*}
      * @private
      */
     _loadSalariesForEmployees = (employeeIds, options = {}) => {
